@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-int bits_bit8(uint8_t input, int nr);
-int bits_bit16(uint16_t input, int nr);
-int bits_bit32(uint32_t input, int nr);
-int bits_bit64(uint64_t input, int nr);
+uint64_t bits_bit8(uint8_t input, int nr);
+uint64_t bits_bit16(uint16_t input, int nr);
+uint64_t bits_bit32(uint32_t input, int nr);
+uint64_t bits_bit64(uint64_t input, int nr);
 
 void bits_split64(uint64_t input, uint64_t *left, uint64_t *right);
 void bits_split(uint64_t input, uint64_t *left, uint64_t *right, int len);
@@ -19,16 +19,16 @@ uint64_t bits_cycle_left(uint64_t val, int shift, int size);
 uint64_t bits_cycle_right(uint64_t val, int shift, int size);
 uint64_t bits_permutate(uint64_t key, int*permutation, int length, int key_length);
 
-int bits_bit8(uint8_t input, int nr) {
+uint64_t bits_bit8(uint8_t input, int nr) {
 	return (input >> nr) & 1;
 }
-int bits_bit16(uint16_t input, int nr) {
+uint64_t bits_bit16(uint16_t input, int nr) {
 	return (input >> nr) & 1;
 }
-int bits_bit32(uint32_t input, int nr) {
+uint64_t bits_bit32(uint32_t input, int nr) {
 	return (input >> nr) & 1;
 }
-int bits_bit64(uint64_t input, int nr) {
+uint64_t bits_bit64(uint64_t input, int nr) {
 	return (input >> nr) & 1;
 }
 
