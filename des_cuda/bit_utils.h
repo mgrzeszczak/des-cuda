@@ -94,4 +94,5 @@ __device__ __host__ void bits_print_grouped(uint64_t val, int group_size, int le
 			printf(" ");
 		}
 	}
+	printf("\n");
 }

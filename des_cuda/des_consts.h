@@ -15,6 +15,8 @@ Shared memory (16 kb per MP)
 
 */
 
+// permutations taken from http://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
+
 __constant__ int dev_PC_1[56] = {
 	57,49,41,33,25,17,9,
 	1,58,50,42,34,26,18,
