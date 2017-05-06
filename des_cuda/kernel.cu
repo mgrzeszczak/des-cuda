@@ -14,7 +14,7 @@
 
 
 int main(int argc, char** argv) {
-	uint64_t key = 0x00000000000efefe;
+	uint64_t key = 0x00000000005efefe;
 	uint64_t block = 0x0123456789ABCDEF;
 	uint64_t encoded = full_des_encode_block(key, block);
 

@@ -2,8 +2,14 @@
 /******************************************
 				MACROS
 ******************************************/
-#define ERR(s,...) (fprintf(stderr, s,__VA_ARGS__),\
-						exit(EXIT_FAILURE))
+//#define ERR(s,...) (fprintf(stderr, s,__VA_ARGS__),\
+//						exit(EXIT_FAILURE))
+
+void ERR(char* s){
+    fprintf(stderr,"%s\n",s);
+    exit(EXIT_FAILURE);
+}
+
 /******************************************
 				CONSTANTS
 ******************************************/

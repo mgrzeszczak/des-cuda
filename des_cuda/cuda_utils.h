@@ -42,12 +42,14 @@ void _cudaDeviceSynchronize(char* s) {
 	cudaError_t cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess) {
 		printf("%s\n", cudaGetErrorString(cudaStatus));
-		ERR("%s launch failed: %s\n",s, cudaGetErrorString(cudaStatus));
+		//ERR("%s launch failed: %s\n",s, cudaGetErrorString(cudaStatus));
+        ERR("launch failed");
 	}
 	cudaStatus = cudaDeviceSynchronize();
 	if (cudaStatus != cudaSuccess) {
 		printf("%s\n", cudaGetErrorString(cudaStatus));
-		ERR("cudaDeviceSynchronize returned error code %d after launching %s!\n",cudaStatus,s);
+		//ERR("cudaDeviceSynchronize returned error code %d after launching %s!\n",cudaStatus,s);
+        ERR("cudaDeviceSynchronize error");
 	}
 }
 
