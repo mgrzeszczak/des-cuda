@@ -7,41 +7,62 @@
 #include "consts.h"
 #include "des.h"
 
-__global__ void crack_des_kernel(uint64_t *blocks, uint64_t *encoded, permutations *perms, bool* flag, uint64_t *key);
-uint64_t run_des_crack(uint64_t *blocks, uint64_t *encoded, int blockCount, permutations *perms);
+__global__ void cuda_des_encode_block(uint64_t block, uint64_t key, uint64_t *encoded);
+__global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, bool* flag, uint64_t *key);
 
-__global__ void crack_des_kernel(uint64_t *blocks, uint64_t *encoded, permutations *perms, bool* flag, uint64_t *key) {
-	*key = 1 << 63;
+void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key);
+void run_des_encode_block(uint64_t key, uint64_t block, uint64_t *result);
+
+__global__ void cuda_des_encode_block(uint64_t block, uint64_t key, uint64_t *encoded) {
+	uint64_t keys[16];
+	des_create_subkeys(key, keys);
+	uint64_t result = des_encode_block(block, keys);
+	*encoded = result;
 }
 
-void run_des_crack(uint64_t *blocks, uint64_t *encoded, int blockCount, permutations *perms, uint64_t *key) {
-	uint64_t *dev_blocks;
-	uint64_t *dev_encoded;
-	permutations *dev_permutations;
+__global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, bool* flag, uint64_t *key) {
+	const int threadCount = 1024;
+	int blockCount = gridDim.x;
+	int tbid = blockIdx.x*threadCount + threadIdx.x;
+	int id = threadIdx.x;
+	int offset = blockIdx.x * threadCount;
 
+	if (tbid == 0) {
+		*key = 1;
+		*key = (*key)<<63;
+	}
+}
+
+void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key) {
 	uint64_t *dev_key;
 	bool *dev_flag;
-
-	_cudaSetDevice(0);
-
-	_cudaMalloc((void**)&dev_blocks, sizeof(uint64_t)*blockCount);
-	_cudaMalloc((void**)&dev_encoded, sizeof(uint64_t)*blockCount);
-	_cudaMalloc((void**)&dev_permutations, sizeof(permutations));
+	bool flag_value = false;
+	// select device
+	_cudaSetDevice(0);	
+	// allocate memory
 	_cudaMalloc((void**)&dev_key, sizeof(uint64_t));
 	_cudaMalloc((void**)&dev_flag, sizeof(bool));
+	// copy values
+	_cudaMemcpy(dev_flag, &flag_value, sizeof(bool), cudaMemcpyHostToDevice);
 
-	_cudaMemcpy(dev_blocks, blocks, sizeof(uint64_t)*blockCount,cudaMemcpyHostToDevice);
-	_cudaMemcpy(dev_encoded, encoded, sizeof(uint64_t)*blockCount,cudaMemcpyHostToDevice);
-	// TODO: memcpy permutations
-
-	crack_des_kernel<<<1, 1>>>(dev_blocks,dev_encoded,dev_permutations,dev_flag,dev_key);
+	cuda_crack_des_kernel << <1, 1024 >> >(block, encoded, dev_flag, dev_key);
 	_cudaDeviceSynchronize("crack_des_kernel");
 
+	// copy result
 	_cudaMemcpy(key, dev_key, sizeof(uint64_t), cudaMemcpyDeviceToHost);
-
-	cudaFree(dev_blocks);
-	cudaFree(dev_encoded);
-	cudaFree(dev_permutations);
+	// free memory
 	cudaFree(dev_key);
 	cudaFree(dev_flag);
+}
+
+void run_des_encode_block(uint64_t key, uint64_t block, uint64_t *result) {
+	uint64_t *dev_result;
+	_cudaSetDevice(0);
+	_cudaMalloc((void**)&dev_result, sizeof(uint64_t));
+
+	cuda_des_encode_block<<<1,1>>>(block, key, dev_result);
+	_cudaDeviceSynchronize("cuda_des_encode_block");
+
+	_cudaMemcpy(result, dev_result, sizeof(uint64_t), cudaMemcpyDeviceToHost);
+	cudaFree(dev_result);
 }

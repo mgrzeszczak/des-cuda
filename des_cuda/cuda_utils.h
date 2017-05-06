@@ -46,7 +46,7 @@ void _cudaDeviceSynchronize(char* s) {
 }
 
 void _cudaPrintMemory() {
-	if (!DEBUG) return;
+	//if (!DEBUG) return;
 	size_t mem_free;
 	size_t mem_total;
 	cudaMemGetInfo(&mem_free, &mem_total);
