@@ -1,0 +1,8 @@
+.vs
+Debug
+*.swp
+*.opensdf
+*.sdf
+*.vcxproj
+*.vcxproj.user
+*.pdb
