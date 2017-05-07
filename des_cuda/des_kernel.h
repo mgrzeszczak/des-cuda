@@ -36,6 +36,7 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t
 	uint64_t total_id = (uint64_t)blockIdx.x*(uint64_t)threadCount + (uint64_t)threadIdx.x;
 	bits_copy(total_id, &current_key, 0, 1, 7);
 	bits_copy(total_id, &current_key, 7, 9, 7);
+	bits_copy(total_id, &current_key, 14, 17, 7);
 
 	/*if (tbid == 16383) {
 		*key = current_key;
@@ -43,18 +44,18 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t
 	
 	uint64_t result;
 	
-    for (uint64_t i=0;i<10*1024;i++) {
-    //for (uint64_t i = 0; i < 4398046511104; i++) {
-		// clear first 48 bits
-		current_key = current_key << 48;
-		current_key = current_key >> 48;
+	const uint64_t max = 34359738368;
+    for (uint64_t i=0;i<10;i++) {
+    //for (uint64_t i = 0; i < max; i++) {
+		// clear first 40 bits
+		current_key = current_key << 40;
+		current_key = current_key >> 40;
 		// copy 
-		bits_copy(i, &current_key, 0, 17, 7);
-		bits_copy(i, &current_key, 7, 25, 7);
-		bits_copy(i, &current_key, 14, 33, 7);
-		bits_copy(i, &current_key, 21, 41, 7);
-		bits_copy(i, &current_key, 28, 49, 7);
-		bits_copy(i, &current_key, 35, 57, 7);
+		bits_copy(i, &current_key, 0, 25, 7);
+		bits_copy(i, &current_key, 7, 33, 7);
+		bits_copy(i, &current_key, 14, 41, 7);
+		bits_copy(i, &current_key, 21, 49, 7);
+		bits_copy(i, &current_key, 28, 57, 7);
 
 		result = full_des_encode_block(current_key, block);
 		if (result == encoded) {
@@ -85,7 +86,7 @@ void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key) {
 	// copy values
 	_cudaMemcpy(dev_key, &key_val, sizeof(uint64_t), cudaMemcpyHostToDevice);
 
-	cuda_crack_des_kernel << <16, 1024 >> >(block, encoded, dev_key);
+	cuda_crack_des_kernel << <2048, 1024 >> >(block, encoded, dev_key);
 	_cudaDeviceSynchronize("crack_des_kernel");
 
 	// copy result
