@@ -9,7 +9,7 @@
 #include "bit_utils.h"
 #include "des_consts.h"
 #include "des_kernel.h"
-
+#include "cuda_utils.h"
 
 
 
@@ -17,6 +17,8 @@ int main(int argc, char** argv) {
 	uint64_t key = 0x00000000005efefe;
 	uint64_t block = 0x0123456789ABCDEF;
 	uint64_t encoded = full_des_encode_block(key, block);
+
+	_cudaSetDevice(1);
 
 	printf("Real key:\n");
 	bits_print_grouped(key, 8, 64);

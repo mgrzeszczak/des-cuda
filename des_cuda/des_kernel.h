@@ -25,7 +25,7 @@ __constant__ uint64_t POW_2_42 = 4398046511104;
 __constant__ uint16_t POW_2_14 = 16384;
 
 __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t *key) {
-	const int threadCount = 1024;
+	const int threadCount = 512;
 	int blockCount = gridDim.x;
 	int tbid = blockIdx.x*threadCount + threadIdx.x;
 	int id = threadIdx.x;
@@ -79,14 +79,14 @@ void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key) {
 	uint64_t *dev_key;
 	uint64_t key_val = 0;
 	// select device
-	_cudaSetDevice(0);	
+	//_cudaSetDevice(0);	
 	//_cudaResizeStack();
 	// allocate memory
 	_cudaMalloc((void**)&dev_key, sizeof(uint64_t));
 	// copy values
 	_cudaMemcpy(dev_key, &key_val, sizeof(uint64_t), cudaMemcpyHostToDevice);
 
-	cuda_crack_des_kernel << <2048, 1024 >> >(block, encoded, dev_key);
+	cuda_crack_des_kernel << <4096, 512 >> >(block, encoded, dev_key);
 	_cudaDeviceSynchronize("crack_des_kernel");
 
 	// copy result
@@ -97,7 +97,7 @@ void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key) {
 
 void run_des_encode_block(uint64_t key, uint64_t block, uint64_t *result) {
 	uint64_t *dev_result;
-	_cudaSetDevice(0);
+	//_cudaSetDevice(0);
 	_cudaMalloc((void**)&dev_result, sizeof(uint64_t));
 
 	cuda_des_encode_block<<<1,1>>>(block, key, dev_result);
