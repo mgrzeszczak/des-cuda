@@ -45,8 +45,8 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t
 	uint64_t result;
 	
 	const uint64_t max = 34359738368;
-    for (uint64_t i=0;i<10;i++) {
-    //for (uint64_t i = 0; i < max; i++) {
+    //for (uint64_t i=0;i<10;i++) {
+    for (uint64_t i = 0; i < max; i++) {
 		// clear first 40 bits
 		current_key = current_key << 40;
 		current_key = current_key >> 40;
