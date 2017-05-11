@@ -10,6 +10,7 @@
 #include <string.h>
 
 uint64_t des_generate_key();
+uint64_t des_generate_key_length(int key_length);
 void chop_into_blocks(char* data, int length, uint64_t **blocks, int *out_block_count);
 
 uint64_t des_generate_key() {
@@ -18,6 +19,14 @@ uint64_t des_generate_key() {
 	for (int i = 0; i < 64; i++) {
 		bits_set(&key, i, rand() % 64>32);
 	}
+	return key;
+}
+
+uint64_t des_generate_key_length(int key_length){
+	uint64_t key = des_generate_key();
+	int shift = 64-key_length;
+	key = key << shift;
+	key = key >> shift;
 	return key;
 }
 

@@ -9,9 +9,9 @@
 #include "des.h"
 
 __global__ void cuda_des_encode_block(uint64_t block, uint64_t key, uint64_t *encoded);
-__global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t *key);
+__global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded,uint64_t limit, uint64_t *key);
 
-void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key);
+void run_des_crack(uint64_t block, uint64_t encoded, int key_length, uint64_t *key);
 void run_des_encode_block(uint64_t key, uint64_t block, uint64_t *result);
 
 __global__ void cuda_des_encode_block(uint64_t block, uint64_t key, uint64_t *encoded) {
@@ -24,7 +24,7 @@ __global__ void cuda_des_encode_block(uint64_t block, uint64_t key, uint64_t *en
 __constant__ uint64_t POW_2_42 = 4398046511104;
 __constant__ uint16_t POW_2_14 = 16384;
 
-__global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t *key) {
+__global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded,uint64_t limit, uint64_t *key) {
 	const int threadCount = 512;
 	int blockCount = gridDim.x;
 	int tbid = blockIdx.x*threadCount + threadIdx.x;
@@ -45,7 +45,7 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t
 	uint64_t result;
 	
 	const uint64_t max = 34359738368;
-    for (uint64_t i=0;i<10;i++) {
+    for (uint64_t i=0;i<limit;i++) {
     //for (uint64_t i = 0; i < max; i++) {
 		// clear first 40 bits
 		current_key = current_key << 40;
@@ -75,9 +75,17 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded, uint64_t
 	}
 }
 
-void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key) {
+void run_des_crack(uint64_t block, uint64_t encoded, int key_length, uint64_t *key) {
 	uint64_t *dev_key;
 	uint64_t key_val = 0;
+
+	uint64_t limit = 1;
+	key_length = key_length - 24;
+	int exp = key_length - (key_length/8);
+	for (int i=0;i<exp;i++){
+		limit *=2;
+	}
+	printf("%d exp\n",exp);
 	// select device
 	//_cudaSetDevice(0);	
 	//_cudaResizeStack();
@@ -86,7 +94,7 @@ void run_des_crack(uint64_t block, uint64_t encoded, uint64_t *key) {
 	// copy values
 	_cudaMemcpy(dev_key, &key_val, sizeof(uint64_t), cudaMemcpyHostToDevice);
 
-	cuda_crack_des_kernel << <4096, 512 >> >(block, encoded, dev_key);
+	cuda_crack_des_kernel << <4096, 512 >> >(block, encoded, limit, dev_key);
 	_cudaDeviceSynchronize("crack_des_kernel");
 
 	// copy result
