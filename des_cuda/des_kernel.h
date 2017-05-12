@@ -13,6 +13,7 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded,uint64_t 
 
 void run_des_crack(uint64_t block, uint64_t encoded, int key_length, uint64_t *key);
 void run_des_encode_block(uint64_t key, uint64_t block, uint64_t *result);
+uint64_t calculate_limit(int key_length);
 
 __global__ void cuda_des_encode_block(uint64_t block, uint64_t key, uint64_t *encoded) {
 	uint64_t keys[16];
@@ -44,7 +45,7 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded,uint64_t 
 	
 	uint64_t result;
 	
-	const uint64_t max = 34359738368;
+	//const uint64_t max = 34359738368;
     for (uint64_t i=0;i<limit;i++) {
     //for (uint64_t i = 0; i < max; i++) {
 		// clear first 40 bits
@@ -75,17 +76,28 @@ __global__ void cuda_crack_des_kernel(uint64_t block, uint64_t encoded,uint64_t 
 	}
 }
 
+uint64_t calculate_limit(int key_length) {
+	const int offset = 24;
+	int input = key_length;
+	input -= offset;
+	int z = (input - 1) / 8 + 1;
+	input -= z;
+
+	printf("%d -> %d\n", key_length, input);
+	uint64_t limit = 1;
+	for (int i = 0; i < input; i++) {
+		limit << 2;
+	}
+	return limit;
+}
+
 void run_des_crack(uint64_t block, uint64_t encoded, int key_length, uint64_t *key) {
 	uint64_t *dev_key;
 	uint64_t key_val = 0;
 
-	uint64_t limit = 1;
-	key_length = key_length - 24;
-	int exp = key_length - (key_length/8);
-	for (int i=0;i<exp;i++){
-		limit *=2;
-	}
-	printf("%d exp\n",exp);
+	uint64_t limit = calculate_limit(key_length);
+	return;
+	
 	// select device
 	//_cudaSetDevice(0);	
 	//_cudaResizeStack();

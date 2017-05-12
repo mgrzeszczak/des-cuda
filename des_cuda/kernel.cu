@@ -44,7 +44,13 @@ int main(int argc, char** argv) {
 	bits_print_grouped(key, 8, 64);
 	printf("Cracking...\n");
 	uint64_t cracked_key;
+
+	clock_t start = clock();
 	run_des_crack(block, encoded, key_length, &cracked_key);
+	clock_t end = clock();
+	float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+	printf("Time passed: %f s\n", seconds);
+
 	printf("Cracked key:\n");
 	bits_print_grouped(cracked_key, 8, 64);
 	return EXIT_SUCCESS;
