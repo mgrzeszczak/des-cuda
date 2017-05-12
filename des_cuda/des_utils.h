@@ -24,7 +24,7 @@ uint64_t des_generate_key() {
 
 uint64_t des_generate_key_length(int key_length){
 	uint64_t key = des_generate_key();
-	int shift = 64-key_length;
+	int shift = 64-key_length+10;
 	key = key << shift;
 	key = key >> shift;
 	return key;

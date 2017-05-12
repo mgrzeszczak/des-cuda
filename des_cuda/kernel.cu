@@ -33,25 +33,28 @@ void usage(char* name){
 int main(int argc, char** argv) {
 	int key_length;
 	parse_args(argc,argv,&key_length);
-	printf("Key length: %d \n",key_length);
+	//printf("Key length: %d \n",key_length);
 	uint64_t key = des_generate_key_length(key_length);
 	uint64_t block = 0x0123456789ABCDEF;
 	uint64_t encoded = full_des_encode_block(key, block);
 
 	_cudaSetDevice(1);
 
-	printf("Real key:\n");
-	bits_print_grouped(key, 8, 64);
-	printf("Cracking...\n");
-	uint64_t cracked_key;
+	//printf("Real key:\n");
+	//bits_print_grouped(key, 8, 64);
+	//printf("Cracking...\n");
+	uint64_t cracked_key = 0;
 
 	clock_t start = clock();
 	run_des_crack(block, encoded, key_length, &cracked_key);
 	clock_t end = clock();
 	float seconds = (float)(end - start) / CLOCKS_PER_SEC;
-	printf("Time passed: %f s\n", seconds);
+	printf("%d,%f\n", key_length,seconds);
 
-	printf("Cracked key:\n");
-	bits_print_grouped(cracked_key, 8, 64);
+	//printf("Cracked key:\n");
+	//bits_print_grouped(cracked_key, 8, 64);
+
+	//bits_print_grouped(encoded,8,64);
+	//bits_print_grouped(full_des_encode_block(cracked_key,block),8,64);
 	return EXIT_SUCCESS;
 }
