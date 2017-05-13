@@ -12,11 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 pdf.options(encoding = 'ISOLatin2')
 data <- read.csv('data.csv')
 data[,2] <- round(as.numeric(data[,2]),2)
-colnames(data) <- c('Dlugość klucza','Czas [s]')
+colnames(data) <- c('Key length','Time [s]')
 
 ```
 
-## Wyniki
+## Results
 ```{r echo=F, message=F, warning=F}
 library('knitr')
 kable(data)
@@ -27,5 +27,5 @@ data <- read.csv('data.csv')
 x <- as.numeric(data[,1])
 y <- as.numeric(data[,2])
 
-plot(x,y,xlab='Długość klucza',ylab='Czas [s]',type='l')
+plot(x,y,xlab='Key length',ylab='Time [s]',type='l')
 ```
